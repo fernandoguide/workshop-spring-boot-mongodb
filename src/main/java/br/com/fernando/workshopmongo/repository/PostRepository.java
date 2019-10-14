@@ -1,5 +1,6 @@
 package br.com.fernando.workshopmongo.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -10,14 +11,16 @@ import br.com.fernando.workshopmongo.domain.Post;
 
 @Repository
 public interface PostRepository extends MongoRepository<Post, String> {
-	
+
 	List<Post> findByTitleContainingIgnoreCase(String text);
-	
-	
+
 //	metodo para fazer busca personalizada no mongoDB 
 //	$regex: ?0 quer dizer q eh o primeiro paramentro passado como argumento no metodo
 //	$options: 'i' eh uma opcao do mongoDB para ignorar letras maiusculas e minusculas
 	@Query("{ 'title': { $regex: ?0, $options: 'i' } }")
 	List<Post> searchTitle(String text);
+
+	@Query("{ $and: [ { date: {$gte: ?1} }, { date: { $lte: ?2} } , { $or: [ { 'title': { $regex: ?0, $options: 'i' } }, { 'body': { $regex: ?0, $options: 'i' } }, { 'comments.text': { $regex: ?0, $options: 'i' } } ] } ] }")
+	List<Post> fullSearch(String text, Date minDate, Date maxDate);
 
 }
